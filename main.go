@@ -3,16 +3,23 @@ package main
 import (
 	"fmt"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 )
+
+var videoExtensions = map[string]struct{}{
+	"mp4": {},
+	"mkv": {},
+	"avi": {},
+	"mov": {},
+	"flv": {},
+}
 
 func main() {
 	fmt.Println("mediahub starting up")
 	files := []string{"movie.mp4", "documentary.mkv", "song.mp3", "clip.avi", "document.txt"}
 	for _, file := range files {
-		ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(file), "."))
+		ext := filepath.Ext(file)
 		if isVideo(ext) {
 			fmt.Printf("Video file: %s\n", file)
 		}
@@ -24,15 +31,20 @@ func describe(title string, year int) string {
 }
 
 func isVideo(ext string) bool {
-	videoExtensions := []string{"mp4", "mkv", "avi", "mov", "flv"}
-	return slices.Contains(videoExtensions, ext)
+
+	ext = strings.ToLower(strings.TrimPrefix(ext, "."))
+	_, ok := videoExtensions[ext]
+	return ok
 }
 
 func parseYear(s string) (int, error) {
 	var year int
 	year, err := strconv.Atoi(s)
 	if err != nil {
-		return 0, fmt.Errorf("invalid year format: %v", err)
+		return 0, fmt.Errorf("invalid year format: %w", err)
+	}
+	if year < 1888 {
+		return 0, fmt.Errorf("year %d is before the first known film", year)
 	}
 	return year, nil
 }
