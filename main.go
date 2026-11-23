@@ -24,6 +24,17 @@ func main() {
 			fmt.Printf("Video file: %s\n", file)
 		}
 	}
+
+	movie := describe("Serial Mom", 1994)
+	fmt.Printf("Movie: %s\n", movie)
+
+	year := "2001"
+	yearInt, err := parseYear(year)
+	if err != nil {
+		fmt.Printf("Error parsing year: %v\n", err)
+		return
+	}
+	fmt.Printf("Year: %d\n", yearInt)
 }
 
 func describe(title string, year int) string {
