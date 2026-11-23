@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -59,30 +60,30 @@ func main() {
 	fmt.Printf("Year: %d\n", yearInt)
 }
 
-func (m Movie) Describe() string {
+func (m *Movie) Describe() string {
 	return fmt.Sprintf("%s (%d)", m.Title, m.Year)
 }
 
-func (m *Movie) Monitor() bool {
+func (m *Movie) Monitor() {
 	m.Monitored = true
-	return m.Monitored
+
 }
 
-func (m *Movie) Unmonitor() bool {
+func (m *Movie) Unmonitor() {
 	m.Monitored = false
-	return m.Monitored
+
 }
 
 func NewMovie(title, yearStr, path string) (*Movie, error) {
 	if title == "" {
-		return nil, fmt.Errorf("title cannot be empty")
+		return nil, errors.New("title cannot be empty")
 	}
-	year, error := parseYear(yearStr)
-	if error != nil {
-		return nil, fmt.Errorf("invalid year: %w", error)
+	year, err := parseYear(yearStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid year: %w", err)
 	}
 	if !isVideo(filepath.Ext(path)) {
-		return nil, fmt.Errorf("file is not a recognized video format")
+		return nil, fmt.Errorf("file %q is not a recognized video format", path)
 	}
 	return &Movie{
 		Title:     title,
@@ -99,7 +100,6 @@ func isVideo(ext string) bool {
 }
 
 func parseYear(s string) (int, error) {
-	var year int
 	year, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, fmt.Errorf("invalid year format: %w", err)
