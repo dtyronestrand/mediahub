@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+type Movie struct {
+	Title     string
+	Year      int
+	Path      string
+	Monitored bool
+}
+
 var videoExtensions = map[string]struct{}{
 	"mp4": {},
 	"mkv": {},
@@ -17,6 +24,24 @@ var videoExtensions = map[string]struct{}{
 
 func main() {
 	fmt.Println("mediahub starting up")
+	movie := Movie{
+		Title:     "Serial Mom",
+		Year:      1994,
+		Path:      "/path/to/serial_mom.mp4",
+		Monitored: false,
+	}
+	movies := []*Movie{
+		{Title: "Inception", Year: 2010, Path: "/path/to/inception.mp4", Monitored: true},
+		{Title: "The Matrix", Year: 1999, Path: "/path/to/the_matrix.mkv", Monitored: false},
+		{Title: "Interstellar", Year: 2014, Path: "/path/to/interstellar.avi", Monitored: true},
+	}
+	monitoredMovies := monitored(movies)
+
+	for _, m := range monitoredMovies {
+		fmt.Printf("%s (%d)\n", m.Title, m.Year)
+	}
+	fmt.Printf("Movie: %s\n", movie.Describe())
+
 	files := []string{"movie.mp4", "documentary.mkv", "song.mp3", "clip.avi", "document.txt"}
 	for _, file := range files {
 		ext := filepath.Ext(file)
@@ -24,9 +49,6 @@ func main() {
 			fmt.Printf("Video file: %s\n", file)
 		}
 	}
-
-	movie := describe("Serial Mom", 1994)
-	fmt.Printf("Movie: %s\n", movie)
 
 	year := "2001"
 	yearInt, err := parseYear(year)
@@ -37,10 +59,38 @@ func main() {
 	fmt.Printf("Year: %d\n", yearInt)
 }
 
-func describe(title string, year int) string {
-	return fmt.Sprintf("%s (%d)", title, year)
+func (m Movie) Describe() string {
+	return fmt.Sprintf("%s (%d)", m.Title, m.Year)
 }
 
+func (m *Movie) Monitor() bool {
+	m.Monitored = true
+	return m.Monitored
+}
+
+func (m *Movie) Unmonitor() bool {
+	m.Monitored = false
+	return m.Monitored
+}
+
+func NewMovie(title, yearStr, path string) (*Movie, error) {
+	if title == "" {
+		return nil, fmt.Errorf("title cannot be empty")
+	}
+	year, error := parseYear(yearStr)
+	if error != nil {
+		return nil, fmt.Errorf("invalid year: %w", error)
+	}
+	if !isVideo(filepath.Ext(path)) {
+		return nil, fmt.Errorf("file is not a recognized video format")
+	}
+	return &Movie{
+		Title:     title,
+		Year:      year,
+		Path:      path,
+		Monitored: false,
+	}, nil
+}
 func isVideo(ext string) bool {
 
 	ext = strings.ToLower(strings.TrimPrefix(ext, "."))
@@ -58,4 +108,14 @@ func parseYear(s string) (int, error) {
 		return 0, fmt.Errorf("year %d is before the first known film", year)
 	}
 	return year, nil
+}
+
+func monitored(movies []*Movie) []*Movie {
+	var result []*Movie
+	for _, m := range movies {
+		if m != nil && m.Monitored {
+			result = append(result, m)
+		}
+	}
+	return result
 }
