@@ -24,40 +24,18 @@ var videoExtensions = map[string]struct{}{
 }
 
 func main() {
-	fmt.Println("mediahub starting up")
+
 	movie := Movie{
-		Title:     "Serial Mom",
-		Year:      1994,
-		Path:      "/path/to/serial_mom.mp4",
-		Monitored: false,
+		Title: "Serial Mom",
+		Year:  1994,
+		Path:  "/path/to/serial_mom.mp4",
 	}
 	movies := []*Movie{
 		{Title: "Inception", Year: 2010, Path: "/path/to/inception.mp4", Monitored: true},
 		{Title: "The Matrix", Year: 1999, Path: "/path/to/the_matrix.mkv", Monitored: false},
 		{Title: "Interstellar", Year: 2014, Path: "/path/to/interstellar.avi", Monitored: true},
 	}
-	monitoredMovies := monitored(movies)
 
-	for _, m := range monitoredMovies {
-		fmt.Printf("%s (%d)\n", m.Title, m.Year)
-	}
-	fmt.Printf("Movie: %s\n", movie.Describe())
-
-	files := []string{"movie.mp4", "documentary.mkv", "song.mp3", "clip.avi", "document.txt"}
-	for _, file := range files {
-		ext := filepath.Ext(file)
-		if isVideo(ext) {
-			fmt.Printf("Video file: %s\n", file)
-		}
-	}
-
-	year := "2001"
-	yearInt, err := parseYear(year)
-	if err != nil {
-		fmt.Printf("Error parsing year: %v\n", err)
-		return
-	}
-	fmt.Printf("Year: %d\n", yearInt)
 }
 
 func (m *Movie) Describe() string {
@@ -86,10 +64,9 @@ func NewMovie(title, yearStr, path string) (*Movie, error) {
 		return nil, fmt.Errorf("file %q is not a recognized video format", path)
 	}
 	return &Movie{
-		Title:     title,
-		Year:      year,
-		Path:      path,
-		Monitored: false,
+		Title: title,
+		Year:  year,
+		Path:  path,
 	}, nil
 }
 func isVideo(ext string) bool {
